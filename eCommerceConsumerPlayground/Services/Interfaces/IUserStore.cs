@@ -7,5 +7,5 @@ namespace ECommerceConsumerPlayground.Services.Interfaces;
 /// </summary>
 public interface IUserStore
 {
-    Task SaveDataAsync(Payment user);
+    Task SaveDataAsync(Order user);
 }

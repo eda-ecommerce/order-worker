@@ -25,7 +25,7 @@ namespace eCommerceConsumerPlayground.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("ECommerceConsumerPlayground.Models.Payment", b =>
+            modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>
                 {
                     b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
@@ -45,7 +45,7 @@ namespace eCommerceConsumerPlayground.Migrations
 
                     b.HasKey("UserId");
 
-                    b.ToTable("Payments");
+                    b.ToTable("Orders");
                 });
 #pragma warning restore 612, 618
         }

@@ -20,35 +20,35 @@ public class UserStore : IUserStore
         _context = context;
     }
     
-    public async Task SaveDataAsync(Payment payment)
+    public async Task SaveDataAsync(Order order)
     {
-        _logger.LogInformation($"Starting persistence operations for user object '{payment}' in database.");
+        _logger.LogInformation($"Starting persistence operations for user object '{order}' in database.");
         try
         {
             // Check if entry already exists
-            var paymentExists = await CheckIfEntryAlreadyExistsAsync(payment);
-            if (paymentExists)
+            var orderExists = await CheckIfEntryAlreadyExistsAsync(order);
+            if (orderExists)
             {
-                _logger.LogInformation($"User object '{payment.Username}' already exists in database. No new persistence.");
+                _logger.LogInformation($"User object '{order.OrderId}' already exists in database. No new persistence.");
                 return;
             }
 
 
 
             // If not already exists, than persist
-            await _context.Payments.AddAsync(payment);
+            await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
             
         }
         catch (Exception e)
         {
-            _logger.LogError($"User object '{payment}' could not be saved on database. Message: {e.Message}");
+            _logger.LogError($"User object '{order}' could not be saved on database. Message: {e.Message}");
         }
     }
 
-    private async Task<bool> CheckIfEntryAlreadyExistsAsync(Payment payment)
+    private async Task<bool> CheckIfEntryAlreadyExistsAsync(Order order)
     {
-        var paymentExists = await _context.Payments.AnyAsync(u => u.Username == payment.Username);
-        return paymentExists;
+        var orderExists = await _context.Orders.AnyAsync(u => u.OrderId == order.OrderId);
+        return orderExists;
     }
 }

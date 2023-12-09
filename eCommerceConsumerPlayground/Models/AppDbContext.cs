@@ -9,5 +9,5 @@ public class AppDbContext : DbContext
     {
     }
 
-    public DbSet<Payment> Payments { get; set; }
+    public DbSet<Order> Orders { get; set; }
 }

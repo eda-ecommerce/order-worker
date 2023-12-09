@@ -12,7 +12,7 @@ namespace eCommerceConsumerPlayground.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Payments",
+                name: "Orders",
                 columns: table => new
                 {
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -22,7 +22,7 @@ namespace eCommerceConsumerPlayground.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Payments", x => x.UserId);
+                    table.PrimaryKey("PK_Orders", x => x.UserId);
                 });
         }
 
@@ -30,7 +30,7 @@ namespace eCommerceConsumerPlayground.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Payments");
+                name: "Orders");
         }
     }
 }

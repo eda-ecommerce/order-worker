@@ -34,7 +34,7 @@ public class ConsumerService : IConsumerService
         //KAFKA_BROKER = "localhost:29092";
         //KAFKA_GROUPID = "ecommerce-gp";
         //KAFKA_TOPIC1 = "test-1";
-        //KAFKA_TOPIC2 = "payment";
+        KAFKA_TOPIC2 = "order";
 
         var consumerConfig = new ConsumerConfig
         {
@@ -71,7 +71,7 @@ public class ConsumerService : IConsumerService
                     
 //                     
                     // Handle message...
-                    var user = JsonSerializer.Deserialize<Payment>(consumeResult.Message.Value)!;
+                    var user = JsonSerializer.Deserialize<Order>(consumeResult.Message.Value)!;
 
                     // Produce messages
                     ProducerConfig configProducer = new ProducerConfig
@@ -84,7 +84,7 @@ public class ConsumerService : IConsumerService
 
                     var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
                     {
-                        Value = JsonSerializer.Serialize<Payment>(user)
+                        Value = JsonSerializer.Serialize<Order>(user)
                     });
 
 

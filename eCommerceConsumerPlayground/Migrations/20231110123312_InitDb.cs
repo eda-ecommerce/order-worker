@@ -32,7 +32,7 @@ namespace eCommerceConsumerPlayground.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Orders");
+                name: "Order");
         }
     }
 }

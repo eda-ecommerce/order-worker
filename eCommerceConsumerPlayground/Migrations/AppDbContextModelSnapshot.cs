@@ -47,7 +47,7 @@ namespace eCommerceConsumerPlayground.Migrations
 
                     b.HasKey("OrderId");
 
-                    b.ToTable("Orders");
+                    b.ToTable("Order");
                 });
 #pragma warning restore 612, 618
         }

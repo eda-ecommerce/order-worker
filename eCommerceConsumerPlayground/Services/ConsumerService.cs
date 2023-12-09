@@ -16,13 +16,13 @@ public class ConsumerService : IConsumerService
     private readonly ILogger<ConsumerService> _logger;
     private readonly IConsumer<Ignore, string> _kafkaConsumer;
     private readonly IConfiguration _configuration;
-    private readonly IUserStore _userStore;
+    private readonly IOrderStore _orderStore;
     private readonly string KAFKA_BROKER;
     private readonly string KAFKA_TOPIC1;
     private readonly string KAFKA_GROUPID;
     private readonly string KAFKA_TOPIC2;
 
-    public ConsumerService(ILogger<ConsumerService> logger, IConfiguration configuration, IUserStore userStore)
+    public ConsumerService(ILogger<ConsumerService> logger, IConfiguration configuration, IOrderStore orderStore)
     {
         _configuration = configuration;
         // Get appsettings and set as static variable
@@ -34,7 +34,7 @@ public class ConsumerService : IConsumerService
         //KAFKA_BROKER = "localhost:29092";
         //KAFKA_GROUPID = "ecommerce-gp";
         //KAFKA_TOPIC1 = "test-1";
-        KAFKA_TOPIC2 = "order";
+        // KAFKA_TOPIC2 = "order";
 
         var consumerConfig = new ConsumerConfig
         {
@@ -46,7 +46,7 @@ public class ConsumerService : IConsumerService
         
         _logger = logger;
         _kafkaConsumer = new ConsumerBuilder<Ignore, string>(consumerConfig).Build();
-        _userStore = userStore;
+        _orderStore = orderStore;
     }
 
 
@@ -71,7 +71,7 @@ public class ConsumerService : IConsumerService
                     
 //                     
                     // Handle message...
-                    var user = JsonSerializer.Deserialize<Order>(consumeResult.Message.Value)!;
+                    var order = JsonSerializer.Deserialize<Order>(consumeResult.Message.Value)!;
 
                     // Produce messages
                     ProducerConfig configProducer = new ProducerConfig
@@ -84,13 +84,13 @@ public class ConsumerService : IConsumerService
 
                     var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
                     {
-                        Value = JsonSerializer.Serialize<Order>(user)
+                        Value = JsonSerializer.Serialize<Order>(order)
                     });
 
 
 
                     // Persistence
-                    await _userStore.SaveDataAsync(user);
+                    await _orderStore.SaveDataAsync(order);
                 }
                 catch (ConsumeException e)
                 {

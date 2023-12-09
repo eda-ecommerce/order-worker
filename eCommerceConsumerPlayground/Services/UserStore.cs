@@ -9,12 +9,12 @@ namespace ECommerceConsumerPlayground.Services;
 /// <summary>
 /// Implementation of User objects in database
 /// </summary>
-public class UserStore : IUserStore
+public class OrderStore : IOrderStore
 {
-    private readonly ILogger<UserStore> _logger;
+    private readonly ILogger<OrderStore> _logger;
     private readonly AppDbContext _context;
 
-    public UserStore(ILogger<UserStore> logger, AppDbContext context)
+    public OrderStore(ILogger<OrderStore> logger, AppDbContext context)
     {
         _logger = logger;
         _context = context;
@@ -22,14 +22,14 @@ public class UserStore : IUserStore
     
     public async Task SaveDataAsync(Order order)
     {
-        _logger.LogInformation($"Starting persistence operations for user object '{order}' in database.");
+        _logger.LogInformation($"Starting persistence operations for order object '{order}' in database.");
         try
         {
             // Check if entry already exists
             var orderExists = await CheckIfEntryAlreadyExistsAsync(order);
             if (orderExists)
             {
-                _logger.LogInformation($"User object '{order.OrderId}' already exists in database. No new persistence.");
+                _logger.LogInformation($"Order object '{order.OrderId}' already exists in database. No new persistence.");
                 return;
             }
 
@@ -42,7 +42,7 @@ public class UserStore : IUserStore
         }
         catch (Exception e)
         {
-            _logger.LogError($"User object '{order}' could not be saved on database. Message: {e.Message}");
+            _logger.LogError($"Order object '{order}' could not be saved on database. Message: {e.Message}");
         }
     }
 

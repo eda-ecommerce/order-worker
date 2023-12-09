@@ -1,4 +1,5 @@
 ﻿using System;
+using eCommerceConsumerPlayground.Models.Database;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -15,14 +16,15 @@ namespace eCommerceConsumerPlayground.Migrations
                 name: "Orders",
                 columns: table => new
                 {
-                    UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Firstname = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Lastname = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Username = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    OrderDate = table.Column<DateTime>(type: "datetime", nullable: false),
+                    OrderStatus = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    TotalPrice = table.Column<Double>(type: "double", nullable: false),
+                    Items = table.Column<List<Item>>(type: "list(item)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Orders", x => x.UserId);
+                    table.PrimaryKey("PK_Orders", x => x.OrderId);
                 });
         }
 

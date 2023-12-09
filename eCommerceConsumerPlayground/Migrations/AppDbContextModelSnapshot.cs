@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eCommerceConsumerPlayground.Models;
+using eCommerceConsumerPlayground.Models.Database;
 
 #nullable disable
 
@@ -24,23 +25,27 @@ namespace eCommerceConsumerPlayground.Migrations
 
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("OrderId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Firstname")
+                    b.Property<DateTime>("OrderDate")
+                        .IsRequired()
+                        .HasColumnType("datetime");
+
+                    b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Lastname")
+                    b.Property<Double>("TotalPrice")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Username")
+                        .HasColumnType("double");
+                    
+                    b.Property<List<Item>>("Items")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("list(item)");
 
-                    b.HasKey("UserId");
+                    b.HasKey("OrderId");
 
                     b.ToTable("Orders");
                 });

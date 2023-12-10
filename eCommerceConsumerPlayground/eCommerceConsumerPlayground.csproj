@@ -32,5 +32,9 @@
   <ItemGroup>
     <Folder Include="Migrations\" />
   </ItemGroup>
+	
+  <ItemGroup>
+    <Compile Remove="Models\KafkaSchemaPayment.cs" />
+  </ItemGroup>
 
 </Project>

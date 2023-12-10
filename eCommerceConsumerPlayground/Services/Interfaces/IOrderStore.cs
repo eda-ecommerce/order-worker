@@ -8,4 +8,5 @@ namespace ECommerceConsumerPlayground.Services.Interfaces;
 public interface IOrderStore
 {
     Task SaveDataAsync(Order order);
+    Task<bool> CheckIfEntryAlreadyExistsAsync(Order order);
 }

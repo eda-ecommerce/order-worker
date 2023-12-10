@@ -22,7 +22,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
         // DI services
         services.AddScoped<App>();
         services.AddScoped<IOrderStore, OrderStore>();
-        services.AddScoped<IConsumerService, ConsumerService>();
+        services.AddScoped<IWorkerService, WorkerService>();
 
         // Definition of startup service
         services.AddHostedService<App>();

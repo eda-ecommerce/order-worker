@@ -46,7 +46,7 @@ public class OrderStore : IOrderStore
         }
     }
 
-    private async Task<bool> CheckIfEntryAlreadyExistsAsync(Order order)
+    public async Task<bool> CheckIfEntryAlreadyExistsAsync(Order order)
     {
         var orderExists = await _context.Orders.AnyAsync(u => u.OrderId == order.OrderId);
         return orderExists;

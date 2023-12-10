@@ -5,15 +5,16 @@ using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using paymentWorker.Models;
 
 namespace ECommerceConsumerPlayground.Services;
 
 /// <summary>
 /// Implementation of Kafka Consumer Service
 /// </summary>
-public class ConsumerService : IConsumerService
+public class WorkerService : IWorkerService
 {
-    private readonly ILogger<ConsumerService> _logger;
+    private readonly ILogger<WorkerService> _logger;
     private readonly IConsumer<Ignore, string> _kafkaConsumer;
     private readonly IConfiguration _configuration;
     private readonly IOrderStore _orderStore;
@@ -22,7 +23,7 @@ public class ConsumerService : IConsumerService
     private readonly string KAFKA_GROUPID;
     private readonly string KAFKA_TOPIC2;
 
-    public ConsumerService(ILogger<ConsumerService> logger, IConfiguration configuration, IOrderStore orderStore)
+    public WorkerService(ILogger<WorkerService> logger, IConfiguration configuration, IOrderStore orderStore)
     {
         _configuration = configuration;
         // Get appsettings and set as static variable
@@ -71,22 +72,43 @@ public class ConsumerService : IConsumerService
                     
 //                     
                     // Handle message...
-                    var order = JsonSerializer.Deserialize<Order>(consumeResult.Message.Value)!;
-
-                    // Produce messages
-                    ProducerConfig configProducer = new ProducerConfig
+                    var orderr = JsonSerializer.Deserialize<Order>(consumeResult.Message.Value)!;
+                    
+                    var order = new Order()
                     {
-                        BootstrapServers = KAFKA_BROKER,
-                        ClientId = Dns.GetHostName()
+                        OrderId = Guid.NewGuid(),
+                        OrderDate = orderr.OrderDate,
+                        OrderStatus = orderr.OrderStatus,
+                        TotalPrice = orderr.TotalPrice,
+                        Items = orderr.Items
+
                     };
 
-                    using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
-
-                    var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
+                    var kafkaOrder = new KafkaSchemaOrder()
                     {
-                        Value = JsonSerializer.Serialize<Order>(order)
-                    });
+                        Source = "Order-Service",
+                        Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
+                        Type = "created",
+                        Order = order
+                    };
+                    
+                    // if statment is required so that a message is only produced if an order does not yet exist.
+                    if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
+                    {
+                        // Produce messages
+                        ProducerConfig configProducer = new ProducerConfig
+                        {
+                            BootstrapServers = KAFKA_BROKER,
+                            ClientId = Dns.GetHostName()
+                        };
 
+                        using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
+
+                        var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
+                        {
+                            Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaOrder)
+                        });
+                    }
 
 
                     // Persistence

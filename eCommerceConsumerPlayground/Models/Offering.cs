@@ -15,9 +15,13 @@ public class Offering
 
     public Guid ProductId { get; set; }
     
-    public Int32 Quantity { get; set; }
+    public int Quantity { get; set; }
 
-    public Double Price { get; set; }
+    public float Price { get; set; }
 
     public bool Status { get; set; }
+    
+    public Guid ItemId { get; set; }
+    
+    public Item Items { get; set; }
 }

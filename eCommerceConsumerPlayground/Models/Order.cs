@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using eCommerceConsumerPlayground.Models;
 using eCommerceConsumerPlayground.Models.Database;
 
 namespace ECommerceConsumerPlayground.Models;
@@ -9,7 +10,7 @@ public class Order
     
     public DateOnly OrderDate { get; set; }
     
-    public string OrderStatus { get; set; }
+    public OrderStatus OrderStatus { get; set; }
     
     public float TotalPrice { get; set; }
      

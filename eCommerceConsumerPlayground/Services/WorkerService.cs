@@ -5,6 +5,7 @@ using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using eCommerceConsumerPlayground.Models;
 using eCommerceConsumerPlayground.Models.Database;
 using paymentWorker.Models;
 
@@ -79,7 +80,7 @@ public class WorkerService : IWorkerService
                     {
                         OrderId = Guid.NewGuid(),
                         OrderDate = DateOnly.FromDateTime(DateTime.Now),
-                        OrderStatus = "received",
+                        OrderStatus = OrderStatus.InProgress,
                         TotalPrice = CalculateTotalPrice(shoppingBasket.ShoppingBasket.Items),
                         Items = shoppingBasket.ShoppingBasket.Items
 

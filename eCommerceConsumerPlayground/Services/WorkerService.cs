@@ -5,6 +5,7 @@ using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using eCommerceConsumerPlayground.Models.Database;
 using paymentWorker.Models;
 
 namespace ECommerceConsumerPlayground.Services;
@@ -69,18 +70,18 @@ public class WorkerService : IWorkerService
                 try
                 {
                     var consumeResult = _kafkaConsumer.Consume(cancellationToken);
-                    
-//                     
+                    Console.Out.WriteLine(consumeResult.Message.Value);
+//                    
                     // Handle message...
-                    var orderr = JsonSerializer.Deserialize<Order>(consumeResult.Message.Value)!;
+                    var shoppingBasket = JsonSerializer.Deserialize<KafkaSchemaShoppingBasket>(consumeResult.Message.Value)!;
                     
                     var order = new Order()
                     {
                         OrderId = Guid.NewGuid(),
-                        OrderDate = orderr.OrderDate,
-                        OrderStatus = orderr.OrderStatus,
-                        TotalPrice = orderr.TotalPrice,
-                        Items = orderr.Items
+                        OrderDate = DateOnly.FromDateTime(DateTime.Now),
+                        OrderStatus = "received",
+                        TotalPrice = CalculateTotalPrice(shoppingBasket.ShoppingBasket.Items),
+                        Items = shoppingBasket.ShoppingBasket.Items
 
                     };
 
@@ -132,6 +133,18 @@ public class WorkerService : IWorkerService
             // Unsubscribe and close
             CloseConsumer();
         }
+    }
+    
+    static float CalculateTotalPrice(List<Item> items)
+    {
+        float totalPrice = 0;
+
+        foreach (var item in items)
+        {
+            totalPrice += item.Quantity * item.Offering.Price;
+        }
+
+        return totalPrice;
     }
 
     public void CloseConsumer()

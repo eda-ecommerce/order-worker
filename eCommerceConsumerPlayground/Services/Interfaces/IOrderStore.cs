@@ -8,6 +8,7 @@ namespace ECommerceConsumerPlayground.Services.Interfaces;
 public interface IOrderStore
 {
     Task SavePaymentAsync(Payment payment);
+    Task UpdatePaymentAsync(Payment payment);
     Task SaveDataAsync(Order order);
     Task<bool> CheckIfPaymentEntryAlreadyExistsAsync(Payment payment);
     Task<bool> CheckIfEntryAlreadyExistsAsync(Order order);

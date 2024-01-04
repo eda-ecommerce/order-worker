@@ -5,6 +5,7 @@ using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using System.Text;
 using eCommerceConsumerPlayground.Models;
 using eCommerceConsumerPlayground.Models.Database;
 using paymentWorker.Models;
@@ -60,7 +61,7 @@ public class WorkerService : IWorkerService
         _kafkaConsumer.Subscribe(new string[]
         {
             KAFKA_TOPIC1,
-            
+            KAFKA_TOPIC3
         });
         
         // Try and catch to ensure the consumer leaves the group cleanly and final offsets are committed.
@@ -73,7 +74,7 @@ public class WorkerService : IWorkerService
                 try
                 {
                     var consumeResult = _kafkaConsumer.Consume(cancellationToken);
-//                    
+                    
                     // Handle message...
                     var shoppingBasket = JsonSerializer.Deserialize<KafkaSchemaShoppingBasket>(consumeResult.Message.Value)!;
                     
@@ -83,15 +84,19 @@ public class WorkerService : IWorkerService
                         CustomerId = shoppingBasket.ShoppingBasket.CustomerId,
                         OrderDate = DateOnly.FromDateTime(DateTime.Now),
                         OrderStatus = OrderStatus.InProgress,
-                        TotalPrice = CalculateTotalPrice(shoppingBasket.ShoppingBasket.Items),
+                        TotalPrice = 0,
                         Items = shoppingBasket.ShoppingBasket.Items
                     };
 
-                    var kafkaOrder = new KafkaSchemaOrder()
+                    var kafkaOrderHeader = new KafkaSchemaOrderHeader()
                     {
                         Source = "Order-Service",
                         Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
                         Operation = "created",
+                    };
+
+                    var kafkaOrder = new KafkaSchemaOrder()
+                    {
                         Order = order
                     };
                     
@@ -107,37 +112,29 @@ public class WorkerService : IWorkerService
 
                         using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
 
+                        var header = new Headers();
+                        header.Add("Source", Encoding.UTF8.GetBytes(kafkaOrderHeader.Source));
+                        header.Add("Timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.Timestamp.ToString()));
+                        header.Add("Operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.Operation));
+                        
                         var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
                         {
-                            Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaOrder)
+                            Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaOrder),
+                            Headers = header
                         });
                         
                         // Persistence
                         await _orderStore.SaveDataAsync(order);
                         
-                        var payment = new Payment()
-                        {
-                            PaymentId = Guid.NewGuid(),
-                            CreatedDate = order.OrderDate,
-                            PaymentDate = null,
-                            OrderId = order.OrderId,
-                            Status = PaymentStatus.Unpaid
-                        };
-
-                        var kafkaPayment = new KafkaSchemaPayment()
-                        {
-                            Source = "Payment-Service",
-                            Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                            Operation = "created",
-                            Payment = payment
-                        };
+                        var payment = JsonSerializer.Deserialize<KafkaSchemaPayment>(consumeResult.Message.Value)!;
                         
-                        var paymentResult = await producer.ProduceAsync(KAFKA_TOPIC3, new Message<Null, string>
+                        if(payment.Operation == "created")
                         {
-                            Value = JsonSerializer.Serialize<KafkaSchemaPayment>(kafkaPayment)
-                        });
-
-                        await _orderStore.SavePaymentAsync(payment);
+                            await _orderStore.SavePaymentAsync(payment.Payment);
+                        } else if (payment.Operation == "updated")
+                        {
+                            await _orderStore.UpdatePaymentAsync(payment.Payment);
+                        }
                     }
 
 
@@ -163,17 +160,17 @@ public class WorkerService : IWorkerService
         }
     }
     
-    static float CalculateTotalPrice(List<Item> items)
-    {
-        float totalPrice = 0;
-
-        foreach (var item in items)
-        {
-            totalPrice += item.Quantity * (item.Offering.Quantity * item.Offering.Price);
-        }
-
-        return totalPrice;
-    }
+    // static float CalculateTotalPrice(List<Item> items)
+    // {
+    //     float totalPrice = 0;
+    //
+    //     foreach (var item in items)
+    //     {
+    //         totalPrice += item.Quantity * (item.Offering.Quantity * item.Offering.Price);
+    //     }
+    //
+    //     return totalPrice;
+    // }
 
     public void CloseConsumer()
     {

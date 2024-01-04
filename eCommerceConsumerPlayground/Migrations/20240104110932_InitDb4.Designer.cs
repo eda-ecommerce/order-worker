@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eCommerceConsumerPlayground.Models;
 
@@ -11,9 +12,11 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240104110932_InitDb4")]
+    partial class InitDb4
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,29 +46,6 @@ namespace eCommerceConsumerPlayground.Migrations
                     b.HasKey("OrderId");
 
                     b.ToTable("Orders");
-                });
-
-            modelBuilder.Entity("ECommerceConsumerPlayground.Models.Payment", b =>
-                {
-                    b.Property<Guid>("PaymentId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly>("CreatedDate")
-                        .HasColumnType("date");
-
-                    b.Property<Guid>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateOnly?>("PaymentDate")
-                        .HasColumnType("date");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.HasKey("PaymentId");
-
-                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>

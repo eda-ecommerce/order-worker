@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using eCommerceConsumerPlayground.Models;
+﻿using eCommerceConsumerPlayground.Models;
 using eCommerceConsumerPlayground.Models.Database;
 
 namespace ECommerceConsumerPlayground.Models;
@@ -7,6 +6,8 @@ namespace ECommerceConsumerPlayground.Models;
 public class Order
 {
     public Guid OrderId { get; set; }
+    
+    public Guid CustomerId { get; set; }
     
     public DateOnly OrderDate { get; set; }
     

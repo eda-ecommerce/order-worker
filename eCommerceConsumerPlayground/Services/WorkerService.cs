@@ -24,6 +24,7 @@ public class WorkerService : IWorkerService
     private readonly string KAFKA_TOPIC1;
     private readonly string KAFKA_GROUPID;
     private readonly string KAFKA_TOPIC2;
+    private readonly string KAFKA_TOPIC3;
 
     public WorkerService(ILogger<WorkerService> logger, IConfiguration configuration, IOrderStore orderStore)
     {
@@ -32,6 +33,7 @@ public class WorkerService : IWorkerService
         KAFKA_BROKER = _configuration.GetValue<string>("Kafka:Broker")!;
         KAFKA_TOPIC1 = _configuration.GetValue<string>("Kafka:Topic1")!;
         KAFKA_TOPIC2 = _configuration.GetValue<string>("Kafka:Topic2")!;
+        KAFKA_TOPIC3 = _configuration.GetValue<string>("Kafka:Topic3")!;
         KAFKA_GROUPID = _configuration.GetValue<string>("Kafka:GroupId")!;
 
         //KAFKA_BROKER = "localhost:29092";
@@ -71,7 +73,6 @@ public class WorkerService : IWorkerService
                 try
                 {
                     var consumeResult = _kafkaConsumer.Consume(cancellationToken);
-                    Console.Out.WriteLine(consumeResult.Message.Value);
 //                    
                     // Handle message...
                     var shoppingBasket = JsonSerializer.Deserialize<KafkaSchemaShoppingBasket>(consumeResult.Message.Value)!;
@@ -79,18 +80,18 @@ public class WorkerService : IWorkerService
                     var order = new Order()
                     {
                         OrderId = Guid.NewGuid(),
+                        CustomerId = shoppingBasket.ShoppingBasket.CustomerId,
                         OrderDate = DateOnly.FromDateTime(DateTime.Now),
                         OrderStatus = OrderStatus.InProgress,
                         TotalPrice = CalculateTotalPrice(shoppingBasket.ShoppingBasket.Items),
                         Items = shoppingBasket.ShoppingBasket.Items
-
                     };
 
                     var kafkaOrder = new KafkaSchemaOrder()
                     {
                         Source = "Order-Service",
                         Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                        Type = "created",
+                        Operation = "created",
                         Order = order
                     };
                     
@@ -110,11 +111,37 @@ public class WorkerService : IWorkerService
                         {
                             Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaOrder)
                         });
+                        
+                        // Persistence
+                        await _orderStore.SaveDataAsync(order);
+                        
+                        var payment = new Payment()
+                        {
+                            PaymentId = Guid.NewGuid(),
+                            CreatedDate = order.OrderDate,
+                            PaymentDate = null,
+                            OrderId = order.OrderId,
+                            Status = PaymentStatus.Unpaid
+                        };
+
+                        var kafkaPayment = new KafkaSchemaPayment()
+                        {
+                            Source = "Payment-Service",
+                            Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
+                            Operation = "created",
+                            Payment = payment
+                        };
+                        
+                        var paymentResult = await producer.ProduceAsync(KAFKA_TOPIC3, new Message<Null, string>
+                        {
+                            Value = JsonSerializer.Serialize<KafkaSchemaPayment>(kafkaPayment)
+                        });
+
+                        await _orderStore.SavePaymentAsync(payment);
                     }
 
 
-                    // Persistence
-                    await _orderStore.SaveDataAsync(order);
+                    
                 }
                 catch (ConsumeException e)
                 {
@@ -142,7 +169,7 @@ public class WorkerService : IWorkerService
 
         foreach (var item in items)
         {
-            totalPrice += item.Quantity * item.Offering.Price;
+            totalPrice += item.Quantity * (item.Offering.Quantity * item.Offering.Price);
         }
 
         return totalPrice;

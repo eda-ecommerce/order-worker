@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-using eCommerceConsumerPlayground.Models.Database;
+﻿using eCommerceConsumerPlayground.Models.Database;
 
 namespace ECommerceConsumerPlayground.Models;
 

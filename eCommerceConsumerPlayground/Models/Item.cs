@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using ECommerceConsumerPlayground.Models;
 
 namespace eCommerceConsumerPlayground.Models.Database;

@@ -8,6 +8,8 @@ public class Payment
     public Guid OrderId { get; set; }
     public DateOnly? PaymentDate { get; set; }
     public DateOnly CreatedDate { get; set; }
-    public PaymentStatus Status { get; set; } 
+    public PaymentStatus Status { get; set; }
+
+    private Order Order { get; set; }
 
 }

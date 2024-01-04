@@ -12,8 +12,8 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240104110932_InitDb4")]
-    partial class InitDb4
+    [Migration("20240104133325_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -46,6 +46,32 @@ namespace eCommerceConsumerPlayground.Migrations
                     b.HasKey("OrderId");
 
                     b.ToTable("Orders");
+                });
+
+            modelBuilder.Entity("ECommerceConsumerPlayground.Models.Payment", b =>
+                {
+                    b.Property<Guid>("PaymentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("CreatedDate")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("OrderId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("PaymentDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.HasKey("PaymentId");
+
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
+                    b.ToTable("Payments");
                 });
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
@@ -96,6 +122,15 @@ namespace eCommerceConsumerPlayground.Migrations
                     b.ToTable("Offerings");
                 });
 
+            modelBuilder.Entity("ECommerceConsumerPlayground.Models.Payment", b =>
+                {
+                    b.HasOne("ECommerceConsumerPlayground.Models.Order", null)
+                        .WithOne("Payment")
+                        .HasForeignKey("ECommerceConsumerPlayground.Models.Payment", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
                     b.HasOne("ECommerceConsumerPlayground.Models.Order", "Order")
@@ -121,6 +156,8 @@ namespace eCommerceConsumerPlayground.Migrations
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>
                 {
                     b.Navigation("Items");
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>

@@ -65,6 +65,9 @@ namespace eCommerceConsumerPlayground.Migrations
 
                     b.HasKey("PaymentId");
 
+                    b.HasIndex("OrderId")
+                        .IsUnique();
+
                     b.ToTable("Payments");
                 });
 
@@ -116,6 +119,15 @@ namespace eCommerceConsumerPlayground.Migrations
                     b.ToTable("Offerings");
                 });
 
+            modelBuilder.Entity("ECommerceConsumerPlayground.Models.Payment", b =>
+                {
+                    b.HasOne("ECommerceConsumerPlayground.Models.Order", null)
+                        .WithOne("Payment")
+                        .HasForeignKey("ECommerceConsumerPlayground.Models.Payment", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
                     b.HasOne("ECommerceConsumerPlayground.Models.Order", "Order")
@@ -141,6 +153,8 @@ namespace eCommerceConsumerPlayground.Migrations
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>
                 {
                     b.Navigation("Items");
+
+                    b.Navigation("Payment");
                 });
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>

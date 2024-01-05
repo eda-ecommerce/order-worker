@@ -20,16 +20,35 @@ public class OrderStore : IOrderStore
         _context = context;
     }
     
-    public async Task UpdatePaymentAsync(Payment payment)
+    public async Task UpdateOrderAsync(Order order)
     {
-        _logger.LogInformation($"Starting persistence operations for payment object '{payment}' in database.");
+        _logger.LogInformation($"Starting update operations for order object '{order}' in database.");
         try
         {
             // Check if entry already exists
-            // var paymentFound = await _context.Payments.FindAsync(payment.PaymentId);
+            var orderr = await _context.Orders.FirstOrDefaultAsync(u => u.OrderId == order.OrderId);
             
             // If not already exists, than persist
-            _context.Payments.Update(payment);
+            orderr.OrderStatus = OrderStatus.Paid;
+            await _context.SaveChangesAsync();
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Order object '{order}' could not be saved on database. Message: {e.Message}");
+        }
+    }
+    
+    public async Task UpdatePaymentAsync(Payment payment)
+    {
+        _logger.LogInformation($"Starting update operations for payment object '{payment}' in database.");
+        try
+        {
+            // Check if entry already exists
+            var order = await _context.Payments.FirstOrDefaultAsync(u => u.OrderId == payment.OrderId);
+            
+            // If not already exists, than persist
+            order.PaymentDate = payment.PaymentDate;
+            order.Status = PaymentStatus.Paid;
             await _context.SaveChangesAsync();
         }
         catch (Exception e)
@@ -92,6 +111,12 @@ public class OrderStore : IOrderStore
     {
         var paymentExists = await _context.Payments.AnyAsync(u => u.PaymentId == payment.PaymentId);
         return paymentExists;
+    }
+    
+    public async Task<bool> CheckIfOrderExistsAsync(Payment payment)
+    {
+        var orderExists = await _context.Orders.AnyAsync(u => u.OrderId == payment.OrderId);
+        return orderExists;
     }
 
     public async Task<bool> CheckIfEntryAlreadyExistsAsync(Order order)

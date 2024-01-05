@@ -77,68 +77,63 @@ public class WorkerService : IWorkerService
                     
                     // Handle message...
                     var shoppingBasket = JsonSerializer.Deserialize<KafkaSchemaShoppingBasket>(consumeResult.Message.Value)!;
-                    
-                    var order = new Order()
-                    {
-                        OrderId = Guid.NewGuid(),
-                        CustomerId = shoppingBasket.ShoppingBasket.CustomerId,
-                        OrderDate = DateOnly.FromDateTime(DateTime.Now),
-                        OrderStatus = OrderStatus.InProgress,
-                        TotalPrice = 0,
-                        Items = shoppingBasket.ShoppingBasket.Items
-                    };
+                    var payment = JsonSerializer.Deserialize<KafkaSchemaPayment>(consumeResult.Message.Value)!;
 
-                    var kafkaOrderHeader = new KafkaSchemaOrderHeader()
-                    {
-                        Source = "Order-Service",
-                        Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                        Operation = "created",
-                    };
-
-                    var kafkaOrder = new KafkaSchemaOrder()
-                    {
-                        Order = order
-                    };
                     
-                    // if statment is required so that a message is only produced if an order does not yet exist.
-                    if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
-                    {
-                        // Produce messages
-                        ProducerConfig configProducer = new ProducerConfig
+                        var order = new Order()
                         {
-                            BootstrapServers = KAFKA_BROKER,
-                            ClientId = Dns.GetHostName()
+                            OrderId = Guid.NewGuid(),
+                            CustomerId = shoppingBasket.ShoppingBasket.CustomerId,
+                            OrderDate = DateOnly.FromDateTime(DateTime.Now),
+                            OrderStatus = OrderStatus.InProgress,
+                            TotalPrice = 0,
+                            Items = shoppingBasket.ShoppingBasket.Items
                         };
 
-                        using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
+                        var kafkaOrderHeader = new KafkaSchemaOrderHeader()
+                        {
+                            Source = "Order-Service",
+                            Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
+                            Operation = "created",
+                        };
 
-                        var header = new Headers();
-                        header.Add("Source", Encoding.UTF8.GetBytes(kafkaOrderHeader.Source));
-                        header.Add("Timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.Timestamp.ToString()));
-                        header.Add("Operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.Operation));
-                        
-                        var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
+                        var kafkaOrder = new KafkaSchemaOrder()
                         {
-                            Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaOrder),
-                            Headers = header
-                        });
-                        
-                        // Persistence
-                        await _orderStore.SaveDataAsync(order);
-                        
-                        var payment = JsonSerializer.Deserialize<KafkaSchemaPayment>(consumeResult.Message.Value)!;
-                        
-                        if(payment.Operation == "created")
+                            Order = order
+                        };
+
+                        // if statment is required so that a message is only produced if an order does not yet exist.
+                        if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
                         {
-                            await _orderStore.SavePaymentAsync(payment.Payment);
-                        } else if (payment.Operation == "updated")
-                        {
-                            await _orderStore.UpdatePaymentAsync(payment.Payment);
+                            // Produce messages
+                            ProducerConfig configProducer = new ProducerConfig
+                            {
+                                BootstrapServers = KAFKA_BROKER,
+                                ClientId = Dns.GetHostName()
+                            };
+
+                            using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
+
+                            var header = new Headers();
+                            header.Add("Source", Encoding.UTF8.GetBytes(kafkaOrderHeader.Source));
+                            header.Add("Timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.Timestamp.ToString()));
+                            header.Add("Operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.Operation));
+
+                            var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
+                            {
+                                Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaOrder),
+                                Headers = header
+                            });
+
+                            // Persistence
+                            await _orderStore.SaveDataAsync(order);
                         }
+                        
+                    if(payment.Operation == "updated" && await _orderStore.CheckIfOrderExistsAsync(payment.Payment))
+                    {
+                        await _orderStore.UpdateOrderAsync(order);
                     }
 
-
-                    
                 }
                 catch (ConsumeException e)
                 {

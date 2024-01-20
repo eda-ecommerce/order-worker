@@ -12,5 +12,5 @@ public class Item
 
     public Order Order { get; set; }
 
-    public Offering Offering { get; set; }
+    // public Offering Offering { get; set; }
 }

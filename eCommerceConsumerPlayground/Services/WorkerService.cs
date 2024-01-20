@@ -94,7 +94,7 @@ public class WorkerService : IWorkerService
                         {
                             Source = "Order-Service",
                             Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                            Operation = "created",
+                            Operation = payment.Operation == "updated" ? "updated" : "created",
                         };
 
                         var kafkaOrder = new KafkaSchemaOrder()
@@ -125,8 +125,11 @@ public class WorkerService : IWorkerService
                                 Headers = header
                             });
 
-                            // Persistence
-                            await _orderStore.SaveDataAsync(order);
+                            if (payment.Operation != "updated")
+                            {
+                                // Persistence
+                                await _orderStore.SaveDataAsync(order);
+                            }
                         }
                         
                     if(payment.Operation == "updated" && await _orderStore.CheckIfOrderExistsAsync(payment.Payment))

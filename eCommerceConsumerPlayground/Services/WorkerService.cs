@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text;
 using eCommerceConsumerPlayground.Models;
-using eCommerceConsumerPlayground.Models.Database;
+using Newtonsoft.Json.Linq;
 using paymentWorker.Models;
 
 namespace ECommerceConsumerPlayground.Services;
@@ -91,6 +91,7 @@ public class WorkerService : IWorkerService
                             TotalPrice = shoppingBasket.ShoppingBasket.TotalPrice,
                             Items = shoppingBasket.ShoppingBasket.Items
                         };
+                        
 
                         var kafkaOrderHeader = new KafkaSchemaOrderHeader()
                         {

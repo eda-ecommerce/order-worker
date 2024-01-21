@@ -12,7 +12,7 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240121123057_InitDb")]
+    [Migration("20240121133857_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />

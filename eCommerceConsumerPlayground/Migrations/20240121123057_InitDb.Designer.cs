@@ -12,7 +12,7 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240104133325_InitDb")]
+    [Migration("20240121123057_InitDb")]
     partial class InitDb
     {
         /// <inheritdoc />
@@ -80,46 +80,23 @@ namespace eCommerceConsumerPlayground.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("OfferingId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
 
+                    b.Property<float>("TotalPrice")
+                        .HasColumnType("real");
+
                     b.HasKey("ItemId");
 
                     b.HasIndex("OrderId");
 
                     b.ToTable("Items");
-                });
-
-            modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Offering", b =>
-                {
-                    b.Property<Guid>("OfferingId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ItemId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<float>("Price")
-                        .HasColumnType("real");
-
-                    b.Property<Guid>("ProductId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.HasKey("OfferingId");
-
-                    b.HasIndex("ItemId")
-                        .IsUnique();
-
-                    b.ToTable("Offerings");
                 });
 
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Payment", b =>
@@ -142,28 +119,11 @@ namespace eCommerceConsumerPlayground.Migrations
                     b.Navigation("Order");
                 });
 
-            modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Offering", b =>
-                {
-                    b.HasOne("eCommerceConsumerPlayground.Models.Database.Item", "Items")
-                        .WithOne("Offering")
-                        .HasForeignKey("eCommerceConsumerPlayground.Models.Database.Offering", "ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Items");
-                });
-
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>
                 {
                     b.Navigation("Items");
 
                     b.Navigation("Payment");
-                });
-
-            modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
-                {
-                    b.Navigation("Offering")
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

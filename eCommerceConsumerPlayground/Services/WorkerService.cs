@@ -78,7 +78,9 @@ public class WorkerService : IWorkerService
                     // Handle message...
                     var shoppingBasket = JsonSerializer.Deserialize<KafkaSchemaShoppingBasket>(consumeResult.Message.Value)!;
                     var payment = JsonSerializer.Deserialize<KafkaSchemaPayment>(consumeResult.Message.Value)!;
-
+                    var paymentSource = Encoding.UTF8.GetString(consumeResult.Message.Headers.GetLastBytes("source"), 0, consumeResult.Message.Headers.GetLastBytes("source").Length);
+                    
+                    var paymentOperation = Encoding.UTF8.GetString(consumeResult.Message.Headers.GetLastBytes("operation"), 0, consumeResult.Message.Headers.GetLastBytes("operation").Length);
                     
                         var order = new Order()
                         {
@@ -86,15 +88,15 @@ public class WorkerService : IWorkerService
                             CustomerId = shoppingBasket.ShoppingBasket.CustomerId,
                             OrderDate = DateOnly.FromDateTime(DateTime.Now),
                             OrderStatus = OrderStatus.InProgress,
-                            TotalPrice = 0,
+                            TotalPrice = shoppingBasket.ShoppingBasket.TotalPrice,
                             Items = shoppingBasket.ShoppingBasket.Items
                         };
 
                         var kafkaOrderHeader = new KafkaSchemaOrderHeader()
                         {
-                            Source = "Order-Service",
+                            Source = "order",
                             Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                            Operation = payment.Operation == "updated" ? "updated" : "created",
+                            Operation = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? "updated" : "created",
                         };
 
                         var kafkaOrder = new KafkaSchemaOrder()
@@ -115,9 +117,9 @@ public class WorkerService : IWorkerService
                             using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
 
                             var header = new Headers();
-                            header.Add("Source", Encoding.UTF8.GetBytes(kafkaOrderHeader.Source));
-                            header.Add("Timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.Timestamp.ToString()));
-                            header.Add("Operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.Operation));
+                            header.Add("source", Encoding.UTF8.GetBytes(kafkaOrderHeader.Source));
+                            header.Add("timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.Timestamp.ToString()));
+                            header.Add("operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.Operation));
 
                             var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
                             {
@@ -125,14 +127,14 @@ public class WorkerService : IWorkerService
                                 Headers = header
                             });
 
-                            if (payment.Operation != "updated")
+                            if (paymentSource == KAFKA_TOPIC1 && paymentOperation != "updated")
                             {
                                 // Persistence
                                 await _orderStore.SaveDataAsync(order);
                             }
                         }
                         
-                    if(payment.Operation == "updated" && await _orderStore.CheckIfOrderExistsAsync(payment.Payment))
+                    if(paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && await _orderStore.CheckIfOrderExistsAsync(payment.Payment))
                     {
                         await _orderStore.UpdateOrderAsync(order);
                     }

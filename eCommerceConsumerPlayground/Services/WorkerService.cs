@@ -84,10 +84,10 @@ public class WorkerService : IWorkerService
                     
                         var order = new Order()
                         {
-                            OrderId = Guid.NewGuid(),
+                            OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
                             CustomerId = shoppingBasket.ShoppingBasket.CustomerId,
                             OrderDate = DateOnly.FromDateTime(DateTime.Now),
-                            OrderStatus = OrderStatus.InProcess,
+                            OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
                             TotalPrice = shoppingBasket.ShoppingBasket.TotalPrice,
                             Items = shoppingBasket.ShoppingBasket.Items
                         };

@@ -87,7 +87,7 @@ public class WorkerService : IWorkerService
                             OrderId = Guid.NewGuid(),
                             CustomerId = shoppingBasket.ShoppingBasket.CustomerId,
                             OrderDate = DateOnly.FromDateTime(DateTime.Now),
-                            OrderStatus = OrderStatus.InProgress,
+                            OrderStatus = OrderStatus.InProcess,
                             TotalPrice = shoppingBasket.ShoppingBasket.TotalPrice,
                             Items = shoppingBasket.ShoppingBasket.Items
                         };
@@ -131,7 +131,7 @@ public class WorkerService : IWorkerService
                             if (paymentSource == KAFKA_TOPIC1 && paymentOperation != "updated")
                             {
                                 // Persistence
-                                await _orderStore.SaveDataAsync(order);
+                                await _orderStore.SaveOrderAsync(order);
                             }
                         }
                         

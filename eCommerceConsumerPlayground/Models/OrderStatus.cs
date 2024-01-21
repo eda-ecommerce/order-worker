@@ -2,7 +2,7 @@ namespace eCommerceConsumerPlayground.Models;
 
 public enum OrderStatus
 {
-    InProgress,
+    InProcess,
     Completed,
     Cancelled,
     Paid

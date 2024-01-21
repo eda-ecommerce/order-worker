@@ -82,14 +82,26 @@ public class WorkerService : IWorkerService
                     
                     var paymentOperation = Encoding.UTF8.GetString(consumeResult.Message.Headers.GetLastBytes("operation"), 0, consumeResult.Message.Headers.GetLastBytes("operation").Length);
                     
-                        var order = new Order()
+                    Order findOrder = null;
+                    if(paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && payment.Payment.OrderId != null)
+                    {
+                        findOrder = await _orderStore.GetOrderAsync(payment.Payment.OrderId);
+                        
+                        if (findOrder == null && paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated")
+                        {
+                            return;
+                        }
+                    }
+                    
+                    
+                    var order = new Order()
                         {
                             OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
-                            CustomerId = shoppingBasket.ShoppingBasket.CustomerId,
-                            OrderDate = DateOnly.FromDateTime(DateTime.Now),
+                            CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.ShoppingBasket.CustomerId,
+                            OrderDate = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
                             OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
-                            TotalPrice = shoppingBasket.ShoppingBasket.TotalPrice,
-                            Items = shoppingBasket.ShoppingBasket.Items
+                            TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.ShoppingBasket.TotalPrice,
+                            Items = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.Items : shoppingBasket.ShoppingBasket.Items
                         };
                         
 

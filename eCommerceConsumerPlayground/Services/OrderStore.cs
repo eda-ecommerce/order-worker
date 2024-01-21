@@ -38,6 +38,24 @@ public class OrderStore : IOrderStore
         }
     }
     
+    public async Task<Order> GetOrderAsync(Guid OrderId)
+    {
+        _logger.LogInformation($"Starting get operations for order object '{OrderId}' in database.");
+        try
+        {
+            // Check if entry already exists
+            var orderr = await _context.Orders.FirstOrDefaultAsync(u => u.OrderId == OrderId);
+            
+            return orderr;
+        }
+        catch (Exception e)
+        {
+            _logger.LogError($"Order object '{OrderId}' could not be saved on database. Message: {e.Message}");
+        }
+
+        return null;
+    }
+    
     public async Task SaveOrderAsync(Order order)
     {
         _logger.LogInformation($"Starting persistence operations for order object '{order}' in database.");

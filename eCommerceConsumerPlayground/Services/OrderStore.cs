@@ -74,6 +74,10 @@ public class OrderStore : IOrderStore
             // If not already exists, than persist
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();
+            _logger.LogInformation($@"Order with Id: '{order.OrderId}' successfully saved in database.
+                OrderId: {order.OrderId}
+                OrderDate: {order.OrderDate}
+                OrderStatus: {order.OrderStatus}");
         }
         catch (Exception e)
         {

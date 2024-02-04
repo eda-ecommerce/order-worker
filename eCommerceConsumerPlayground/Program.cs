@@ -2,11 +2,13 @@
 using eCommerceConsumerPlayground.Models;
 using ECommerceConsumerPlayground.Services;
 using ECommerceConsumerPlayground.Services.Interfaces;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
+String? connectionstring = "";
 
 using IHost host = Host.CreateDefaultBuilder(args)
     .ConfigureServices((hostContext, services) =>
@@ -14,7 +16,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
         IConfiguration configuration = hostContext.Configuration;
 
         // Read appsettings
-        var connectionstring = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("DBSTRING")) ? Environment.GetEnvironmentVariable("DBSTRING") : configuration.GetConnectionString("SqlServer");
+        connectionstring = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("DBSTRING")) ? Environment.GetEnvironmentVariable("DBSTRING") : configuration.GetConnectionString("SqlServer");
         // DbContext
         services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(connectionstring));
@@ -32,11 +34,34 @@ using IHost host = Host.CreateDefaultBuilder(args)
 using (var scope = host.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
+    var context = services.GetService<AppDbContext>();
 
-    var context = services.GetRequiredService<AppDbContext>();
+    SqlConnectionStringBuilder sqlConnectionStringBuilder = new SqlConnectionStringBuilder(connectionstring);
+    sqlConnectionStringBuilder.InitialCatalog = "master";
+
+    context.Database.SetConnectionString(sqlConnectionStringBuilder.ConnectionString);
+
+
+    Console.WriteLine("Waiting for DB connection...");
+
+    while (!context.Database.CanConnect())
+    {
+        int milliseconds = 2000;
+        Thread.Sleep(milliseconds);
+        Console.WriteLine("Trying to connect to DB...");
+        // we need to wait, since we need to run migrations
+    }
+
+    Console.WriteLine("DB connected");
+
+    context.Database.SetConnectionString(connectionstring);
+
+    //var context = services.GetRequiredService<AppDbContext>();
     if (context.Database.GetPendingMigrations().Any())
     {
+        Console.WriteLine("Running migrations");
         context.Database.Migrate();
+        Console.WriteLine("Migrations have been successfull");
     }
 }
 

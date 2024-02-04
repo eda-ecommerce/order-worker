@@ -66,3 +66,5 @@ using (var scope = host.Services.CreateScope())
 }
 
 await host.RunAsync();
+
+public partial class Program { }

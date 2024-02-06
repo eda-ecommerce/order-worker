@@ -70,12 +70,12 @@ public class OrderStoreIntegrationTests : IClassFixture<WebApplicationFactory<Pr
 
     private AppDbContext CreateDbContext()
     {
-        var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseInMemoryDatabase(databaseName: "testing")
+        var optins = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
             .Options;
-
-        var dbContext = new AppDbContext(options);
-        return dbContext;
+        var databaseContext = new AppDbContext(optins);
+        databaseContext.Database.EnsureCreated();
+        return databaseContext;
     }
 
     private ILogger<T> CreateLogger<T>()

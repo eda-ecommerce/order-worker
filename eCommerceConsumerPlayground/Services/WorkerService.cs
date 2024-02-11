@@ -192,4 +192,46 @@ public class WorkerService : IWorkerService
         _kafkaConsumer.Unsubscribe();
         _kafkaConsumer.Close();
     }
+    
+    public (bool, ShoppingBasket?) DeserializeKafkaMessage(ConsumeResult<Ignore, string> consumeResult)
+    {
+        ShoppingBasket? shoppingBasket = null;
+        try
+        {
+            shoppingBasket = JsonSerializer.Deserialize<ShoppingBasket>(consumeResult.Message.Value);
+            return (true, shoppingBasket);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(205, "Message could not be deserialized into the default model.");
+            _logger.LogWarning(205, $"Exception: {ex.Message}");
+            return (false, null);
+        }
+    }
+    
+    private async void SendKafkaMessageForUpdateOrder(Order order)
+    {
+        _logger.LogInformation($" Create Kafka message for order: {order.OrderId}");
+        // Produce messages
+        ProducerConfig configProducer = new ProducerConfig
+        {
+            BootstrapServers = KAFKA_BROKER,
+            ClientId = Dns.GetHostName()
+        };
+                        
+        // Create Kafka Header
+        var header = new Headers();
+        header.Add("Source", Encoding.UTF8.GetBytes("order"));
+        header.Add("Timestamp", Encoding.UTF8.GetBytes(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString()));
+        header.Add("Operation", Encoding.UTF8.GetBytes("created"));
+                        
+        using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
+
+        var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
+        {
+            Value = JsonSerializer.Serialize<Order>(order),
+            Headers = header
+        });
+        _logger.LogInformation($" Kafka message was produced for order: {order.OrderId}");
+    }
 }

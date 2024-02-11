@@ -2,6 +2,7 @@
 using eCommerceConsumerPlayground.Models;
 using ECommerceConsumerPlayground.Services;
 using ECommerceConsumerPlayground.Services.Interfaces;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -29,6 +30,7 @@ using IHost host = Host.CreateDefaultBuilder(args)
         // Definition of startup service
         services.AddHostedService<App>();
     })
+    .ConfigureWebHostDefaults(b => b.Configure(app => {}))
     .Build();
 
 using (var scope = host.Services.CreateScope())
@@ -66,3 +68,5 @@ using (var scope = host.Services.CreateScope())
 }
 
 await host.RunAsync();
+
+public partial class Program { }

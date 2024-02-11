@@ -12,8 +12,8 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240121133857_InitDb")]
-    partial class InitDb
+    [Migration("20240204223654_testing")]
+    partial class testing
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -68,9 +68,6 @@ namespace eCommerceConsumerPlayground.Migrations
 
                     b.HasKey("PaymentId");
 
-                    b.HasIndex("OrderId")
-                        .IsUnique();
-
                     b.ToTable("Payments");
                 });
 
@@ -99,15 +96,6 @@ namespace eCommerceConsumerPlayground.Migrations
                     b.ToTable("Items");
                 });
 
-            modelBuilder.Entity("ECommerceConsumerPlayground.Models.Payment", b =>
-                {
-                    b.HasOne("ECommerceConsumerPlayground.Models.Order", null)
-                        .WithOne("Payment")
-                        .HasForeignKey("ECommerceConsumerPlayground.Models.Payment", "OrderId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
                     b.HasOne("ECommerceConsumerPlayground.Models.Order", "Order")
@@ -122,8 +110,6 @@ namespace eCommerceConsumerPlayground.Migrations
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>
                 {
                     b.Navigation("Items");
-
-                    b.Navigation("Payment");
                 });
 #pragma warning restore 612, 618
         }

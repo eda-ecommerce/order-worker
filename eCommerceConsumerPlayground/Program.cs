@@ -57,11 +57,19 @@ using (var scope = host.Services.CreateScope())
     // context.Database.SetConnectionString(connectionstring);
 
     //var context = services.GetRequiredService<AppDbContext>();
-    if (context.Database.GetPendingMigrations().Any())
+
+    try
     {
-        Console.WriteLine("Running migrations");
-        context.Database.Migrate();
-        Console.WriteLine("Migrations have been successfull");
+
+        if (context.Database.GetPendingMigrations().Any())
+        {
+            Console.WriteLine("Running migrations");
+            context.Database.Migrate();
+            Console.WriteLine("Migrations have been successfull");
+        }
+    } catch (Exception ex)
+    {
+        Console.WriteLine($"Error: Either the Database does not exist or migrations were not succesfull: {ex.Message}");
     }
 }
 

@@ -168,9 +168,17 @@ public class WorkerService : IWorkerService
                         _logger.LogError(3000, "Fatal error on consuming Kafka Message..");
                         break;
                     }
+                    if (e.StackTrace != null)
+                    {
+                        _logger.LogWarning(2000, $"Stacktrace: {e.StackTrace}");
+                    }
                 } catch (Exception e)
                 {
                     _logger.LogWarning(2000, $"Unexpected Error on consumer Loop. Reason: {e.Message}");
+                    if (e.StackTrace != null)
+                    {
+                        _logger.LogWarning(2000, $"Stacktrace: {e.StackTrace}");
+                    }                    
                 }
             }
         }

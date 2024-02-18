@@ -11,7 +11,7 @@ public class KafkaSchemaOrder
     
     public DateOnly OrderDate { get; set; }
     
-    public OrderStatus OrderStatus { get; set; }
+    public string OrderStatus { get; set; }
     
     public float TotalPrice { get; set; }
      

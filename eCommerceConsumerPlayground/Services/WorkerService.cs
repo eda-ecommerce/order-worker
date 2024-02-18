@@ -132,7 +132,7 @@ public class WorkerService : IWorkerService
                         OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
                         CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.ShoppingBasket.customerId,
                         OrderDate = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
-                        OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
+                        OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid.ToString() : OrderStatus.InProcess.ToString(),
                         TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.ShoppingBasket.totalPrice,
                         Items = shoppingBasketItems
                     };

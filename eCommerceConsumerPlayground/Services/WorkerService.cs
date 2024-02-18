@@ -152,7 +152,12 @@ public class WorkerService : IWorkerService
                     }
 
                 }
-                catch (ConsumeException e)
+                catch (OperationCanceledException)
+                {
+                    // Unsubscribe and close
+                    CloseConsumer();
+                }
+                catch (ConsumeException  e)
                 {
                     // Consumer errors should generally be ignored (or logged) unless fatal.
                     _logger.LogWarning(2000, $"Error on consuming Kafka Message. Reason: {e.Error.Reason}");
@@ -162,6 +167,17 @@ public class WorkerService : IWorkerService
                         _logger.LogError(3000, "Fatal error on consuming Kafka Message..");
                         break;
                     }
+                    if (e.StackTrace != null)
+                    {
+                        _logger.LogWarning(2000, $"Stacktrace: {e.StackTrace}");
+                    }
+                } catch (Exception e)
+                {
+                    _logger.LogWarning(2000, $"Unexpected Error on consumer Loop. Reason: {e.Message}");
+                    if (e.StackTrace != null)
+                    {
+                        _logger.LogWarning(2000, $"Stacktrace: {e.StackTrace}");
+                    }                    
                 }
             }
         }

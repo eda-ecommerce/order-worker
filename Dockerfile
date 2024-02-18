@@ -1,14 +1,14 @@
 #See https://aka.ms/customizecontainer to learn how to customize your debug container and how Visual Studio uses this Dockerfile to build your images for faster debugging.
 
-FROM mcr.microsoft.com/dotnet/runtime:8.0 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
-ENV DBSTRING "Data Source=localhost,1433;Initial Catalog=order;User ID=sa;Password=yourStrong(!)Password;TrustServerCertificate=True"
-ENV KAFKABROKER "localhost:29092"
-ENV KAFKATOPIC1 "shoppingBasket"
-ENV KAFKATOPIC2 "order"
-ENV KAFKATOPIC3 "payment"
-ENV KAFKAGROUPID "ecommerce-gp"
+# ENV DBSTRING "Data Source=localhost,1433;Initial Catalog=order;User ID=sa;Password=yourStrong(!)Password;TrustServerCertificate=True"
+# ENV KAFKABROKER "localhost:29092"
+# ENV KAFKATOPIC1 "shoppingBasket"
+# ENV KAFKATOPIC2 "order"
+# ENV KAFKATOPIC3 "payment"
+# ENV KAFKAGROUPID "ecommerce-gp"
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release

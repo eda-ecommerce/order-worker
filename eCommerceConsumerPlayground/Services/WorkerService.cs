@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text;
 using eCommerceConsumerPlayground.Models;
+using eCommerceConsumerPlayground.Models.Database;
 using paymentWorker.Models;
 
 namespace ECommerceConsumerPlayground.Services;
@@ -93,6 +94,49 @@ public class WorkerService : IWorkerService
                     }
                     
                     
+                    
+                    List<KafkaSchemaItem> shoppingBasketItems = new List<KafkaSchemaItem>();
+                    if ((paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null))
+                    {
+                        shoppingBasket.ShoppingBasket.shoppingBasketItems.ForEach(s =>
+                        {
+                            findOrder.Items.Add(
+                                new()
+                                {
+                                    shoppingBasketId = s.shoppingBasketId,
+                                    itemState = s.itemState,
+                                    quantity = s.quantity,
+                                    offeringId = s.offeringId,
+                                    totalPrice = s.totalPrice
+                                });
+                        });
+                    }
+                    else
+                    {
+                        shoppingBasket.ShoppingBasket.shoppingBasketItems.ForEach(s =>
+                        {
+                            shoppingBasketItems.Add(
+                                new()
+                                {
+                                    shoppingBasketId = s.shoppingBasketId,
+                                    itemState = s.itemState,
+                                    quantity = s.quantity,
+                                    offeringId = s.offeringId,
+                                    totalPrice = s.totalPrice
+                                });
+                        });
+                    }
+                    
+                    var kafkaSchemaOrder = new KafkaSchemaOrder()
+                    {
+                        OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
+                        CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.ShoppingBasket.customerId,
+                        OrderDate = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
+                        OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
+                        TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.ShoppingBasket.totalPrice,
+                        Items = shoppingBasketItems
+                    };
+                    
                     var order = new Order()
                         {
                             OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
@@ -109,11 +153,6 @@ public class WorkerService : IWorkerService
                             source = "order",
                             timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
                             operation = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? "updated" : "created",
-                        };
-
-                        var kafkaOrder = new KafkaSchemaOrder()
-                        {
-                            Order = order
                         };
 
                         // if statment is required so that a message is only produced if an order does not yet exist.
@@ -135,7 +174,7 @@ public class WorkerService : IWorkerService
 
                             var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
                             {
-                                Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaOrder),
+                                Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaSchemaOrder),
                                 Headers = header
                             });
 

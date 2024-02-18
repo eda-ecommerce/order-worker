@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using System.Net;
 using System.Text;
 using eCommerceConsumerPlayground.Models;
-using Newtonsoft.Json.Linq;
 using paymentWorker.Models;
 
 namespace ECommerceConsumerPlayground.Services;
@@ -97,19 +96,19 @@ public class WorkerService : IWorkerService
                     var order = new Order()
                         {
                             OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
-                            CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.ShoppingBasket.CustomerId,
+                            CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.ShoppingBasket.customerId,
                             OrderDate = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
                             OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
-                            TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.ShoppingBasket.TotalPrice,
-                            Items = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.Items : shoppingBasket.ShoppingBasket.Items
+                            TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.ShoppingBasket.totalPrice,
+                            Items = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.Items : shoppingBasket.ShoppingBasket.shoppingBasketItems
                         };
                         
 
                         var kafkaOrderHeader = new KafkaSchemaOrderHeader()
                         {
-                            Source = "order",
-                            Timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                            Operation = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? "updated" : "created",
+                            source = "order",
+                            timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
+                            operation = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? "updated" : "created",
                         };
 
                         var kafkaOrder = new KafkaSchemaOrder()
@@ -130,9 +129,9 @@ public class WorkerService : IWorkerService
                             using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
 
                             var header = new Headers();
-                            header.Add("source", Encoding.UTF8.GetBytes(kafkaOrderHeader.Source));
-                            header.Add("timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.Timestamp.ToString()));
-                            header.Add("operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.Operation));
+                            header.Add("source", Encoding.UTF8.GetBytes(kafkaOrderHeader.source));
+                            header.Add("timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.timestamp.ToString()));
+                            header.Add("operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.operation));
 
                             var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
                             {
@@ -172,18 +171,6 @@ public class WorkerService : IWorkerService
             CloseConsumer();
         }
     }
-    
-    // static float CalculateTotalPrice(List<Item> items)
-    // {
-    //     float totalPrice = 0;
-    //
-    //     foreach (var item in items)
-    //     {
-    //         totalPrice += item.Quantity * (item.Offering.Quantity * item.Offering.Price);
-    //     }
-    //
-    //     return totalPrice;
-    // }
 
     public void CloseConsumer()
     {
@@ -207,31 +194,5 @@ public class WorkerService : IWorkerService
             _logger.LogWarning(205, $"Exception: {ex.Message}");
             return (false, null);
         }
-    }
-    
-    private async void SendKafkaMessageForUpdateOrder(Order order)
-    {
-        _logger.LogInformation($" Create Kafka message for order: {order.OrderId}");
-        // Produce messages
-        ProducerConfig configProducer = new ProducerConfig
-        {
-            BootstrapServers = KAFKA_BROKER,
-            ClientId = Dns.GetHostName()
-        };
-                        
-        // Create Kafka Header
-        var header = new Headers();
-        header.Add("Source", Encoding.UTF8.GetBytes("order"));
-        header.Add("Timestamp", Encoding.UTF8.GetBytes(new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString()));
-        header.Add("Operation", Encoding.UTF8.GetBytes("created"));
-                        
-        using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
-
-        var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
-        {
-            Value = JsonSerializer.Serialize<Order>(order),
-            Headers = header
-        });
-        _logger.LogInformation($" Kafka message was produced for order: {order.OrderId}");
     }
 }

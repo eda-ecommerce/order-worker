@@ -58,7 +58,7 @@ public class OrderServiceTest
         {
             Message = new Message<Ignore, string>
             {
-                Value = "{\"ShoppingBasketId\":\"123123\",\"CustomerId\":\"123123\",\"TotalItemQuantity\":5,\"Items\":[{\"TotalPrice\":100,\"Quantity\":1},{\"OfferingId\":\"ab64cc0d-5a0b-4643-93e7-7912e6d6f78f\",\"TotalPrice\":100,\"Quantity\":1},{\"OfferingId\":\"ab64cc0d-5a0b-4643-93e7-7912e6d6f78f\",\"TotalPrice\":100,\"Quantity\":1},{\"OfferingId\":\"ab64cc0d-5a0b-4643-93e7-7912e6d6f78f\",\"TotalPrice\":100,\"Quantity\":1},{\"OfferingId\":\"ab64cc0d-5a0b-4643-93e7-7912e6d6f78f\",\"TotalPrice\":100,\"Quantity\":1}]}\n"
+                Value = "{\"shoppingBasketId\":\"123123\",\"customerId\":\"123123\",\"totalItemQuantity\":5,\"items\":[{\"totalPrice\":100,\"quantity\":1},{\"offeringId\":\"ab64cc0d-5a0b-4643-93e7-7912e6d6f78f\",\"totalPrice\":100,\"quantity\":1},{\"offeringId\":\"ab64cc0d-5a0b-4643-93e7-7912e6d6f78f\",\"totalPrice\":100,\"quantity\":1},{\"offeringId\":\"ab64cc0d-5a0b-4643-93e7-7912e6d6f78f\",\"totalPrice\":100,\"quantity\":1},{\"offeringId\":\"ab64cc0d-5a0b-4643-93e7-7912e6d6f78f\",\"totalPrice\":100,\"quantity\":1}]}\n"
             }
         };
         

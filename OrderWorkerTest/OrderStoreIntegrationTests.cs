@@ -12,6 +12,16 @@ namespace OrderWorkerTest;
 public class OrderStoreIntegrationTests : IClassFixture<WebApplicationFactory<Program>>
 {
     private readonly WebApplicationFactory<Program> _factory;
+    
+    private async Task<AppDbContext> GetDatabaseContext()
+    {
+        var optins = new DbContextOptionsBuilder<AppDbContext>()
+            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+            .Options;
+        var databaseContext = new AppDbContext(optins);
+        databaseContext.Database.EnsureCreated();
+        return databaseContext;
+    }
 
     public OrderStoreIntegrationTests(WebApplicationFactory<Program> factory)
     {
@@ -22,18 +32,17 @@ public class OrderStoreIntegrationTests : IClassFixture<WebApplicationFactory<Pr
     public async Task SaveOrderAndGetOrder_ReturnsSavedOrder()
     {
         // Arrange
-        var client = _factory.CreateClient();
         var dbContext = CreateDbContext();
 
         var order1Id = Guid.NewGuid();
         ICollection<Item> shoppingBasketItems = new List<Item>();
         shoppingBasketItems.Add(new Item()
             {
-                ItemId = Guid.NewGuid(),
-                OfferingId = Guid.NewGuid(),
-                Quantity = 5,
-                TotalPrice = 500,
-                OrderId = order1Id
+                itemId = Guid.NewGuid(),
+                offeringId = Guid.NewGuid(),
+                quantity = 5,
+                totalPrice = 500,
+                orderId = order1Id
             }
         );
         

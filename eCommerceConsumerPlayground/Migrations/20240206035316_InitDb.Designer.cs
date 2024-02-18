@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using eCommerceConsumerPlayground.Models;
 
@@ -11,9 +12,11 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240206035316_InitDb")]
+    partial class InitDb
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -70,30 +73,23 @@ namespace eCommerceConsumerPlayground.Migrations
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
-                    b.Property<Guid>("itemId")
+                    b.Property<Guid>("ItemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("OrderId")
+                    b.Property<Guid>("OfferingId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("itemState")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid>("offeringId")
+                    b.Property<Guid>("OrderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("quantity")
+                    b.Property<int>("Quantity")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("shoppingBasketId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<float>("totalPrice")
+                    b.Property<float>("TotalPrice")
                         .HasColumnType("real");
 
-                    b.HasKey("itemId");
+                    b.HasKey("ItemId");
 
                     b.HasIndex("OrderId");
 
@@ -102,9 +98,13 @@ namespace eCommerceConsumerPlayground.Migrations
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
-                    b.HasOne("ECommerceConsumerPlayground.Models.Order", null)
+                    b.HasOne("ECommerceConsumerPlayground.Models.Order", "Order")
                         .WithMany("Items")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>

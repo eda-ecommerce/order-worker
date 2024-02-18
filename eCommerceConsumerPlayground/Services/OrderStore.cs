@@ -68,9 +68,7 @@ public class OrderStore : IOrderStore
                 _logger.LogInformation($"Order object '{order.OrderId}' already exists in database. No new persistence.");
                 return;
             }
-
-
-
+            
             // If not already exists, than persist
             await _context.Orders.AddAsync(order);
             await _context.SaveChangesAsync();

@@ -4,14 +4,14 @@ namespace ECommerceConsumerPlayground.Models;
 
 public class ShoppingBasket
 {
-    public Guid ShoppingBasketId { get; set; }
+    public Guid shoppingBasketId { get; set; }
     
-    public Guid CustomerId { get; set; }
+    public Guid customerId { get; set; }
     
-    public float TotalPrice { get; set; }
+    public float totalPrice { get; set; }
     
-    public int TotalItemQuantity { get; set; }
+    public int totalItemQuantity { get; set; }
      
-     public List<Item> Items { get; set; } = new List<Item>();
+     public List<Item> shoppingBasketItems { get; set; } = new List<Item>();
 
 }

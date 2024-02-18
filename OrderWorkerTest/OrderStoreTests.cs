@@ -35,11 +35,14 @@ public class OrderStoreTests
         ICollection<Item> shoppingBasketItems = new List<Item>();
         shoppingBasketItems.Add(new Item()
             {
-                ItemId = Guid.NewGuid(),
-                OfferingId = Guid.NewGuid(),
-                Quantity = 5,
-                TotalPrice = 500,
-                OrderId = order1Id
+                itemId = Guid.NewGuid(),
+                offeringId = Guid.NewGuid(),
+                shoppingBasketId = Guid.NewGuid(),
+                itemState = "active",
+                quantity = 5,
+                totalPrice = 500,
+                orderId = order1Id
+                
             }
         );
         
@@ -84,11 +87,11 @@ public class OrderStoreTests
         {
             new Item()
             {
-                ItemId = Guid.NewGuid(),
-                OfferingId = Guid.NewGuid(),
-                OrderId = order1Id,
-                Quantity = 5,
-                TotalPrice = 500
+                itemId = Guid.NewGuid(),
+                offeringId = Guid.NewGuid(),
+                orderId = order1Id,
+                quantity = 5,
+                totalPrice = 500
             }
         };
         

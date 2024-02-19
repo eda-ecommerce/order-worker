@@ -1,11 +1,17 @@
 using ECommerceConsumerPlayground.Models;
+using eCommerceConsumerPlayground.Models.Database;
 
 namespace paymentWorker.Models;
 
 public class KafkaSchemaShoppingBasket
 {
-    public String source { get; set; }
-    public long timestamp { get; set; }
-    public string operation { get; set; }
-    public ShoppingBasket ShoppingBasket { get; set; }
+    public Guid shoppingBasketId { get; set; }
+    
+    public Guid customerId { get; set; }
+    
+    public float totalPrice { get; set; }
+    
+    public int totalItemQuantity { get; set; }
+     
+    public List<Item> shoppingBasketItems { get; set; } = new List<Item>();
 }

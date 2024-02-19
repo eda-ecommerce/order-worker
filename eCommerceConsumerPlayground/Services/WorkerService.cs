@@ -98,7 +98,7 @@ public class WorkerService : IWorkerService
                     List<KafkaSchemaItem> shoppingBasketItems = new List<KafkaSchemaItem>();
                     if ((paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null))
                     {
-                        shoppingBasket.ShoppingBasket.shoppingBasketItems.ForEach(s =>
+                        shoppingBasket.shoppingBasketItems.ForEach(s =>
                         {
                             findOrder.Items.Add(
                                 new()
@@ -113,7 +113,7 @@ public class WorkerService : IWorkerService
                     }
                     else
                     {
-                        shoppingBasket.ShoppingBasket.shoppingBasketItems.ForEach(s =>
+                        shoppingBasket.shoppingBasketItems.ForEach(s =>
                         {
                             shoppingBasketItems.Add(
                                 new()
@@ -130,21 +130,21 @@ public class WorkerService : IWorkerService
                     var kafkaSchemaOrder = new KafkaSchemaOrder()
                     {
                         OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
-                        CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.ShoppingBasket.customerId,
+                        CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.customerId,
                         OrderDate = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
                         OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid.ToString() : OrderStatus.InProcess.ToString(),
-                        TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.ShoppingBasket.totalPrice,
+                        TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.totalPrice,
                         Items = shoppingBasketItems
                     };
                     
                     var order = new Order()
                         {
                             OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
-                            CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.ShoppingBasket.customerId,
+                            CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.customerId,
                             OrderDate = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
                             OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
-                            TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.ShoppingBasket.totalPrice,
-                            Items = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.Items : shoppingBasket.ShoppingBasket.shoppingBasketItems
+                            TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.totalPrice,
+                            Items = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.Items : shoppingBasket.shoppingBasketItems
                         };
                         
 

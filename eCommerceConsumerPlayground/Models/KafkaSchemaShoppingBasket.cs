@@ -1,3 +1,4 @@
+using eCommerceConsumerPlayground.Models;
 using ECommerceConsumerPlayground.Models;
 using eCommerceConsumerPlayground.Models.Database;
 
@@ -13,5 +14,5 @@ public class KafkaSchemaShoppingBasket
     
     public int totalItemQuantity { get; set; }
      
-    public List<Item> shoppingBasketItems { get; set; } = new List<Item>();
+    public List<KafkaSchemaItem> shoppingBasketItems { get; set; } = new List<KafkaSchemaItem>();
 }

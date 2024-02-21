@@ -1,10 +1,12 @@
+using System.ComponentModel.DataAnnotations;
 using ECommerceConsumerPlayground.Models;
 
 namespace eCommerceConsumerPlayground.Models.Database;
 
 public class Item
 {
-    public Guid itemId { get; set; }
+    [Key]
+    public Guid shoppingBasketItemId { get; set; }
     
     public Guid shoppingBasketId { get; set; }
     

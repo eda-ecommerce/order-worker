@@ -45,7 +45,7 @@ namespace eCommerceConsumerPlayground.Migrations
                 name: "Items",
                 columns: table => new
                 {
-                    itemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shoppingBasketItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     shoppingBasketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     quantity = table.Column<int>(type: "int", nullable: false),
                     orderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
@@ -55,7 +55,7 @@ namespace eCommerceConsumerPlayground.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Items", x => x.itemId);
+                    table.PrimaryKey("PK_Items", x => x.shoppingBasketItemId);
                     table.ForeignKey(
                         name: "FK_Items_Orders_orderId",
                         column: x => x.orderId,

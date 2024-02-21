@@ -15,4 +15,6 @@ public interface IOrderStore
    
     Task<bool> CheckIfOrderExistsAsync(KafkaSchemaPayment payment);
     Task<bool> CheckIfEntryAlreadyExistsAsync(Order order);
+    
+    Task<bool> CheckIfShoppingBasketIdExistsAsync(Guid shoppingBasketId);
 }

@@ -12,8 +12,8 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240220232809_InitDb1")]
-    partial class InitDb1
+    [Migration("20240221022722_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,7 +73,7 @@ namespace eCommerceConsumerPlayground.Migrations
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
-                    b.Property<Guid>("itemId")
+                    b.Property<Guid>("shoppingBasketItemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -96,7 +96,7 @@ namespace eCommerceConsumerPlayground.Migrations
                     b.Property<float>("totalPrice")
                         .HasColumnType("real");
 
-                    b.HasKey("itemId");
+                    b.HasKey("shoppingBasketItemId");
 
                     b.HasIndex("orderId");
 

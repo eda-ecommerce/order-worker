@@ -94,6 +94,12 @@ public class OrderStore : IOrderStore
         var orderExists = await _context.Orders.AnyAsync(u => u.OrderId == payment.OrderId);
         return orderExists;
     }
+    
+    public async Task<bool> CheckIfShoppingBasketIdExistsAsync(Guid shoppingBasketId)
+    {
+        var itemExists = await _context.Items.AnyAsync(u => u.shoppingBasketId == shoppingBasketId);
+        return itemExists;
+    }
 
     public async Task<bool> CheckIfEntryAlreadyExistsAsync(Order order)
     {

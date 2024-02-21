@@ -35,7 +35,7 @@ public class OrderStoreTests
         ICollection<Item> shoppingBasketItems = new List<Item>();
         shoppingBasketItems.Add(new Item()
             {
-                itemId = Guid.NewGuid(),
+                shoppingBasketItemId = Guid.NewGuid(),
                 offeringId = Guid.NewGuid(),
                 shoppingBasketId = Guid.NewGuid(),
                 itemState = "active",
@@ -87,7 +87,7 @@ public class OrderStoreTests
         {
             new Item()
             {
-                itemId = Guid.NewGuid(),
+                shoppingBasketItemId = Guid.NewGuid(),
                 offeringId = Guid.NewGuid(),
                 orderId = order1Id,
                 quantity = 5,

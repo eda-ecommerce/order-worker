@@ -70,7 +70,7 @@ namespace eCommerceConsumerPlayground.Migrations
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
-                    b.Property<Guid>("itemId")
+                    b.Property<Guid>("shoppingBasketItemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
@@ -93,7 +93,7 @@ namespace eCommerceConsumerPlayground.Migrations
                     b.Property<float>("totalPrice")
                         .HasColumnType("real");
 
-                    b.HasKey("itemId");
+                    b.HasKey("shoppingBasketItemId");
 
                     b.HasIndex("orderId");
 

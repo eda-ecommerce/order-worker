@@ -97,6 +97,7 @@ public class WorkerService : IWorkerService
                             shoppingBasketItems.Add(
                                 new()
                                 {
+                                    shoppingBasketItemId = s.shoppingBasketId,
                                     shoppingBasketId = s.shoppingBasketId,
                                     itemState = s.itemState,
                                     quantity = s.quantity,
@@ -112,6 +113,41 @@ public class WorkerService : IWorkerService
                             shoppingBasketItems.Add(
                                 new()
                                 {
+                                    shoppingBasketItemId = s.shoppingBasketItemId,
+                                    shoppingBasketId = s.shoppingBasketId,
+                                    itemState = s.itemState,
+                                    quantity = s.quantity,
+                                    offeringId = s.offeringId,
+                                    totalPrice = s.totalPrice
+                                });
+                        });
+                    }
+                    
+                    List<Item> shoppingBasketItemss = new List<Item>();
+                    if ((paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null))
+                    {
+                        findOrder.Items.ToList().ForEach(s =>
+                        {
+                            shoppingBasketItemss.Add(
+                                new()
+                                {
+                                    shoppingBasketItemId = s.shoppingBasketItemId,
+                                    shoppingBasketId = s.shoppingBasketId,
+                                    itemState = s.itemState,
+                                    quantity = s.quantity,
+                                    offeringId = s.offeringId,
+                                    totalPrice = s.totalPrice
+                                });
+                        });
+                    }
+                    else
+                    {
+                        shoppingBasket.shoppingBasketItems.ForEach(s =>
+                        {
+                            shoppingBasketItemss.Add(
+                                new()
+                                {
+                                    shoppingBasketItemId = s.shoppingBasketItemId,
                                     shoppingBasketId = s.shoppingBasketId,
                                     itemState = s.itemState,
                                     quantity = s.quantity,
@@ -139,7 +175,7 @@ public class WorkerService : IWorkerService
                             OrderDate = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
                             OrderStatus = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
                             TotalPrice = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.totalPrice,
-                            Items = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.Items : shoppingBasket.shoppingBasketItems
+                            Items = shoppingBasketItemss
                         };
                         
 
@@ -167,11 +203,11 @@ public class WorkerService : IWorkerService
                         // if statment is required so that a message is only produced if an order does not yet exist.
                         if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
                         {
-                            if (paymentSource == KAFKA_TOPIC1 && paymentOperation != "updated")
+                            if (paymentSource == KAFKA_TOPIC1 && paymentOperation != "updated" && !await _orderStore.CheckIfShoppingBasketIdExistsAsync(shoppingBasket.shoppingBasketId))
                             {
                                 await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
-                                {
-                                    Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaSchemaOrder),
+                                { 
+                                    Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaSchemaOrder), 
                                     Headers = header
                                 });
                                 // Persistence

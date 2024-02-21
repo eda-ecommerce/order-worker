@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace eCommerceConsumerPlayground.Migrations
 {
     /// <inheritdoc />
-    public partial class testing : Migration
+    public partial class InitDb : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -45,27 +45,29 @@ namespace eCommerceConsumerPlayground.Migrations
                 name: "Items",
                 columns: table => new
                 {
-                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Quantity = table.Column<int>(type: "int", nullable: false),
-                    OrderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    OfferingId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    TotalPrice = table.Column<float>(type: "real", nullable: false)
+                    itemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    shoppingBasketId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    quantity = table.Column<int>(type: "int", nullable: false),
+                    orderId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    offeringId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    totalPrice = table.Column<float>(type: "real", nullable: false),
+                    itemState = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Items", x => x.ItemId);
+                    table.PrimaryKey("PK_Items", x => x.itemId);
                     table.ForeignKey(
-                        name: "FK_Items_Orders_OrderId",
-                        column: x => x.OrderId,
+                        name: "FK_Items_Orders_orderId",
+                        column: x => x.orderId,
                         principalTable: "Orders",
                         principalColumn: "OrderId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Items_OrderId",
+                name: "IX_Items_orderId",
                 table: "Items",
-                column: "OrderId");
+                column: "orderId");
         }
 
         /// <inheritdoc />

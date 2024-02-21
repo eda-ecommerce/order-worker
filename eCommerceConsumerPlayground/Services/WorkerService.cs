@@ -78,29 +78,23 @@ public class WorkerService : IWorkerService
                     // Handle message...
                     var shoppingBasket = JsonSerializer.Deserialize<KafkaSchemaShoppingBasket>(consumeResult.Message.Value)!;
                     var payment = JsonSerializer.Deserialize<KafkaSchemaPayment>(consumeResult.Message.Value)!;
+                   
                     var paymentSource = Encoding.UTF8.GetString(consumeResult.Message.Headers.GetLastBytes("source"), 0, consumeResult.Message.Headers.GetLastBytes("source").Length);
                     
                     var paymentOperation = Encoding.UTF8.GetString(consumeResult.Message.Headers.GetLastBytes("operation"), 0, consumeResult.Message.Headers.GetLastBytes("operation").Length);
                     
                     Order findOrder = null;
-                    if(paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && payment.Payment.OrderId != null)
+                    if(paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && payment.OrderId != null)
                     {
-                        findOrder = await _orderStore.GetOrderAsync(payment.Payment.OrderId);
-                        
-                        if (findOrder == null && paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated")
-                        {
-                            return;
-                        }
+                        findOrder = await _orderStore.GetOrderAsync(payment.OrderId);
                     }
                     
-                    
-                    
                     List<KafkaSchemaItem> shoppingBasketItems = new List<KafkaSchemaItem>();
-                    if ((paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null))
+                    if ((paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null))
                     {
-                        shoppingBasket.shoppingBasketItems.ForEach(s =>
+                        findOrder.Items.ToList().ForEach(s =>
                         {
-                            findOrder.Items.Add(
+                            shoppingBasketItems.Add(
                                 new()
                                 {
                                     shoppingBasketId = s.shoppingBasketId,
@@ -126,25 +120,26 @@ public class WorkerService : IWorkerService
                                 });
                         });
                     }
-                    
+
+                    var orderId = Guid.NewGuid();
                     var kafkaSchemaOrder = new KafkaSchemaOrder()
                     {
-                        OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
-                        CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.customerId,
-                        OrderDate = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
-                        OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid.ToString() : OrderStatus.InProcess.ToString(),
-                        TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.totalPrice,
+                        OrderId = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated") ? payment.OrderId : orderId,
+                        CustomerId = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.customerId,
+                        OrderDate = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
+                        OrderStatus = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated") ? OrderStatus.Paid.ToString() : OrderStatus.InProcess.ToString(),
+                        TotalPrice = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.totalPrice,
                         Items = shoppingBasketItems
                     };
                     
                     var order = new Order()
                         {
-                            OrderId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? payment.Payment.OrderId : Guid.NewGuid(),
-                            CustomerId = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.customerId,
-                            OrderDate = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
-                            OrderStatus = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
-                            TotalPrice = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.totalPrice,
-                            Items = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && findOrder != null) ? findOrder.Items : shoppingBasket.shoppingBasketItems
+                            OrderId = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated") ? payment.OrderId : orderId,
+                            CustomerId = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.CustomerId : shoppingBasket.customerId,
+                            OrderDate = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.OrderDate : DateOnly.FromDateTime(DateTime.Now),
+                            OrderStatus = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated") ? OrderStatus.Paid : OrderStatus.InProcess,
+                            TotalPrice = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.TotalPrice : shoppingBasket.totalPrice,
+                            Items = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && findOrder != null) ? findOrder.Items : shoppingBasket.shoppingBasketItems
                         };
                         
 
@@ -152,71 +147,59 @@ public class WorkerService : IWorkerService
                         {
                             source = "order",
                             timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                            operation = (paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated") ? "updated" : "created",
+                            operation = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated") ? "updated" : "created",
+                        };
+                        
+                        // Produce messages
+                        ProducerConfig configProducer = new ProducerConfig
+                        {
+                            BootstrapServers = KAFKA_BROKER,
+                            ClientId = Dns.GetHostName()
                         };
 
+                        using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
+
+                        var header = new Headers();
+                        header.Add("source", Encoding.UTF8.GetBytes(kafkaOrderHeader.source));
+                        header.Add("timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.timestamp.ToString()));
+                        header.Add("operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.operation));
+                        
                         // if statment is required so that a message is only produced if an order does not yet exist.
                         if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
                         {
-                            // Produce messages
-                            ProducerConfig configProducer = new ProducerConfig
-                            {
-                                BootstrapServers = KAFKA_BROKER,
-                                ClientId = Dns.GetHostName()
-                            };
-
-                            using var producer = new ProducerBuilder<Null, string>(configProducer).Build();
-
-                            var header = new Headers();
-                            header.Add("source", Encoding.UTF8.GetBytes(kafkaOrderHeader.source));
-                            header.Add("timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.timestamp.ToString()));
-                            header.Add("operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.operation));
-
-                            var result = await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
-                            {
-                                Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaSchemaOrder),
-                                Headers = header
-                            });
-
                             if (paymentSource == KAFKA_TOPIC1 && paymentOperation != "updated")
                             {
+                                await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
+                                {
+                                    Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaSchemaOrder),
+                                    Headers = header
+                                });
                                 // Persistence
                                 await _orderStore.SaveOrderAsync(order);
                             }
                         }
                         
-                    if(paymentSource == KAFKA_TOPIC1 && paymentOperation == "updated" && await _orderStore.CheckIfOrderExistsAsync(payment.Payment))
+                    if(paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated" && await _orderStore.CheckIfOrderExistsAsync(payment))
                     {
+                        await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
+                        {
+                            Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaSchemaOrder),
+                            Headers = header
+                        });
                         await _orderStore.UpdateOrderAsync(order);
                     }
 
                 }
-                catch (OperationCanceledException)
-                {
-                    // Unsubscribe and close
-                    CloseConsumer();
-                }
                 catch (ConsumeException  e)
                 {
                     // Consumer errors should generally be ignored (or logged) unless fatal.
-                    _logger.LogWarning(2000, $"Error on consuming Kafka Message. Reason: {e.Error.Reason}");
+                    _logger.LogWarning($"Error on consuming Kafka Message. Reason: {e.Error.Reason}");
 
                     if (e.Error.IsFatal)
                     {
-                        _logger.LogError(3000, "Fatal error on consuming Kafka Message..");
+                        _logger.LogError("Fatal error on consuming Kafka Message..");
                         break;
                     }
-                    if (e.StackTrace != null)
-                    {
-                        _logger.LogWarning(2000, $"Stacktrace: {e.StackTrace}");
-                    }
-                } catch (Exception e)
-                {
-                    _logger.LogWarning(2000, $"Unexpected Error on consumer Loop. Reason: {e.Message}");
-                    if (e.StackTrace != null)
-                    {
-                        _logger.LogWarning(2000, $"Stacktrace: {e.StackTrace}");
-                    }                    
                 }
             }
         }

@@ -3,6 +3,7 @@ using ECommerceConsumerPlayground.Models;
 using ECommerceConsumerPlayground.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
+using paymentWorker.Models;
 
 namespace ECommerceConsumerPlayground.Services;
 
@@ -43,8 +44,13 @@ public class OrderStore : IOrderStore
         _logger.LogInformation($"Starting get operations for order object '{OrderId}' in database.");
         try
         {
+            Order? orderr = null;
             // Check if entry already exists
-            var orderr = await _context.Orders.FirstOrDefaultAsync(u => u.OrderId == OrderId);
+            var orderExists = await _context.Orders.AnyAsync(u => u.OrderId == OrderId);
+            if (orderExists)
+            {
+                orderr = await _context.Orders.Include("Items").FirstOrDefaultAsync(u => u.OrderId == OrderId);
+            }
             
             return orderr;
         }
@@ -83,7 +89,7 @@ public class OrderStore : IOrderStore
         }
     }
     
-    public async Task<bool> CheckIfOrderExistsAsync(Payment payment)
+    public async Task<bool> CheckIfOrderExistsAsync(KafkaSchemaPayment payment)
     {
         var orderExists = await _context.Orders.AnyAsync(u => u.OrderId == payment.OrderId);
         return orderExists;

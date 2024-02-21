@@ -12,8 +12,8 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240218172652_InitDb1")]
-    partial class InitDb1
+    [Migration("20240220230122_InitDb")]
+    partial class InitDb
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -77,14 +77,14 @@ namespace eCommerceConsumerPlayground.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("OrderId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<string>("itemState")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("offeringId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("orderId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("quantity")
@@ -98,7 +98,7 @@ namespace eCommerceConsumerPlayground.Migrations
 
                     b.HasKey("itemId");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("orderId");
 
                     b.ToTable("Items");
                 });
@@ -107,7 +107,9 @@ namespace eCommerceConsumerPlayground.Migrations
                 {
                     b.HasOne("ECommerceConsumerPlayground.Models.Order", null)
                         .WithMany("Items")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("orderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>

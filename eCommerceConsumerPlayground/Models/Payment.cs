@@ -10,6 +10,4 @@ public class Payment
     public DateOnly CreatedDate { get; set; }
     public PaymentStatus Status { get; set; }
 
-    private Order Order { get; set; }
-
 }

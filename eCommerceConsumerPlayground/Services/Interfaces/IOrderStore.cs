@@ -1,4 +1,5 @@
 using ECommerceConsumerPlayground.Models;
+using paymentWorker.Models;
 
 namespace ECommerceConsumerPlayground.Services.Interfaces;
 
@@ -12,6 +13,6 @@ public interface IOrderStore
 
     Task<Order> GetOrderAsync(Guid OrderId);
    
-    Task<bool> CheckIfOrderExistsAsync(Payment payment);
+    Task<bool> CheckIfOrderExistsAsync(KafkaSchemaPayment payment);
     Task<bool> CheckIfEntryAlreadyExistsAsync(Order order);
 }

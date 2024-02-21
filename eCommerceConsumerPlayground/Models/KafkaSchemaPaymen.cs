@@ -1,8 +1,14 @@
+using eCommerceConsumerPlayground.Models;
 using ECommerceConsumerPlayground.Models;
 
 namespace paymentWorker.Models;
 
 public class KafkaSchemaPayment
 {
-    public Payment Payment { get; set; }
+    public Guid PaymentId { get; set; }
+
+    public Guid OrderId { get; set; }
+    public DateOnly? PaymentDate { get; set; }
+    public DateOnly CreatedDate { get; set; }
+    public PaymentStatus Status { get; set; }
 }

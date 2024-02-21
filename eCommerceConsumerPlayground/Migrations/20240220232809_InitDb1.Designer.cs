@@ -12,8 +12,8 @@ using eCommerceConsumerPlayground.Models;
 namespace eCommerceConsumerPlayground.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240206035316_InitDb")]
-    partial class InitDb
+    [Migration("20240220232809_InitDb1")]
+    partial class InitDb1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -73,38 +73,43 @@ namespace eCommerceConsumerPlayground.Migrations
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
-                    b.Property<Guid>("ItemId")
+                    b.Property<Guid>("itemId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("OfferingId")
+                    b.Property<string>("itemState")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("offeringId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("OrderId")
+                    b.Property<Guid>("orderId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Quantity")
+                    b.Property<int>("quantity")
                         .HasColumnType("int");
 
-                    b.Property<float>("TotalPrice")
+                    b.Property<Guid>("shoppingBasketId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<float>("totalPrice")
                         .HasColumnType("real");
 
-                    b.HasKey("ItemId");
+                    b.HasKey("itemId");
 
-                    b.HasIndex("OrderId");
+                    b.HasIndex("orderId");
 
                     b.ToTable("Items");
                 });
 
             modelBuilder.Entity("eCommerceConsumerPlayground.Models.Database.Item", b =>
                 {
-                    b.HasOne("ECommerceConsumerPlayground.Models.Order", "Order")
+                    b.HasOne("ECommerceConsumerPlayground.Models.Order", null)
                         .WithMany("Items")
-                        .HasForeignKey("OrderId")
+                        .HasForeignKey("orderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Order");
                 });
 
             modelBuilder.Entity("ECommerceConsumerPlayground.Models.Order", b =>

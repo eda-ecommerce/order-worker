@@ -203,7 +203,7 @@ public class WorkerService : IWorkerService
                         // if statment is required so that a message is only produced if an order does not yet exist.
                         if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
                         {
-                            if (paymentSource == KAFKA_TOPIC1 && paymentOperation != "updated" && !await _orderStore.CheckIfShoppingBasketIdExistsAsync(shoppingBasket.shoppingBasketId))
+                            if (paymentSource == KAFKA_TOPIC1 && paymentOperation == "CHECKOUT" && !await _orderStore.CheckIfShoppingBasketIdExistsAsync(shoppingBasket.shoppingBasketId))
                             {
                                 await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
                                 { 

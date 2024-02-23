@@ -183,7 +183,7 @@ public class WorkerService : IWorkerService
                         {
                             source = "order",
                             timestamp = new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds(),
-                            operation = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated") ? "updated" : "CREATED",
+                            Operation = (paymentSource == KAFKA_TOPIC3 && paymentOperation == "updated") ? "updated" : "created",
                         };
                         
                         // Produce messages

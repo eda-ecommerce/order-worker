@@ -199,10 +199,14 @@ public class WorkerService : IWorkerService
                         header.Add("source", Encoding.UTF8.GetBytes(kafkaOrderHeader.source));
                         header.Add("timestamp", Encoding.UTF8.GetBytes(kafkaOrderHeader.timestamp.ToString()));
                         header.Add("operation", Encoding.UTF8.GetBytes(kafkaOrderHeader.operation));
+
+                            Console.WriteLine("I am before here");
+
                         
                         // if statment is required so that a message is only produced if an order does not yet exist.
                         if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
                         {
+                            Console.WriteLine("I am here");
                             if (paymentSource == KAFKA_TOPIC1 && paymentOperation == "CHECKOUT" && !await _orderStore.CheckIfShoppingBasketIdExistsAsync(shoppingBasket.shoppingBasketId))
                             {
                                 await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>

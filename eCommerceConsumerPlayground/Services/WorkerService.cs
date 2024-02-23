@@ -207,6 +207,8 @@ public class WorkerService : IWorkerService
                         if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
                         {
                             Console.WriteLine("I am here");
+                            Console.WriteLine(paymentSource);
+                            Console.WriteLine(paymentOperation);
 
                             if (paymentSource == KAFKA_TOPIC1 && paymentOperation == "CHECKOUT") {
                                                         Console.WriteLine("I am uhkgvchhere");

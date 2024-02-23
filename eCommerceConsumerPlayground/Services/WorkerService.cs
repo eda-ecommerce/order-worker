@@ -207,8 +207,16 @@ public class WorkerService : IWorkerService
                         if (!await _orderStore.CheckIfEntryAlreadyExistsAsync(order))
                         {
                             Console.WriteLine("I am here");
+
+                            if (paymentSource == KAFKA_TOPIC1 && paymentOperation == "CHECKOUT") {
+                                                        Console.WriteLine("I am uhkgvchhere");
+
+                            }
+                            
                             if (paymentSource == KAFKA_TOPIC1 && paymentOperation == "CHECKOUT" && !await _orderStore.CheckIfShoppingBasketIdExistsAsync(shoppingBasket.shoppingBasketId))
                             {
+                               Console.WriteLine("I am super here");
+
                                 await producer.ProduceAsync(KAFKA_TOPIC2, new Message<Null, string>
                                 { 
                                     Value = JsonSerializer.Serialize<KafkaSchemaOrder>(kafkaSchemaOrder), 

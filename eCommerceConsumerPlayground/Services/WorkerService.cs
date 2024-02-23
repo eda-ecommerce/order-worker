@@ -218,7 +218,7 @@ public class WorkerService : IWorkerService
 
                             }
                             
-                            if (paymentSource == KAFKA_TOPIC1 && paymentOperation == "CHECKOUT" && !await _orderStore.CheckIfShoppingBasketIdExistsAsync(shoppingBasket.shoppingBasketId))
+                            if (paymentSource == "shopping-basket-service" && paymentOperation == "CHECKOUT" && !await _orderStore.CheckIfShoppingBasketIdExistsAsync(shoppingBasket.shoppingBasketId))
                             {
                                Console.WriteLine("I am super here");
 

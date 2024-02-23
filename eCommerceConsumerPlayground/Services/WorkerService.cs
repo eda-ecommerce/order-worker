@@ -208,7 +208,10 @@ public class WorkerService : IWorkerService
                         {
                             Console.WriteLine("I am here");
                             Console.WriteLine(paymentSource);
+                            Console.WriteLine(KAFKA_TOPIC1);
+                            Console.WriteLine(paymentSource == KAFKA_TOPIC1);
                             Console.WriteLine(paymentOperation);
+                            Console.WriteLine(paymentOperation == "CHECKOUT");
 
                             if (paymentSource == KAFKA_TOPIC1 && paymentOperation == "CHECKOUT") {
                                                         Console.WriteLine("I am uhkgvchhere");
